@@ -892,6 +892,33 @@ void panic_bad_stack(struct pt_regs *regs, unsigned int esr, unsigned long far)
 }
 #endif
 
+#define SYS_IMP_APL_LSU_ERR_STS   sys_reg(3, 3, 15, 0, 0)
+#define SYS_IMP_APL_E_LSU_ERR_STS sys_reg(3, 3, 15, 2, 0)
+#define SYS_IMP_APL_L2C_ERR_STS sys_reg(3, 3, 15, 8, 0)
+#define SYS_IMP_APL_L2C_ERR_ADR sys_reg(3, 3, 15, 9, 0)
+#define SYS_IMP_APL_L2C_ERR_INF sys_reg(3, 3, 15, 10, 0)
+#define SYS_IMP_APL_FED_ERR_STS   sys_reg(3, 4, 15, 0, 0)
+#define SYS_IMP_APL_E_FED_ERR_STS sys_reg(3, 4, 15, 0, 2)
+#define SYS_IMP_APL_MMU_ERR_STS   sys_reg(3, 6, 15, 0, 0)
+#define SYS_IMP_APL_E_MMU_ERR_STS sys_reg(3, 6, 15, 2, 0)
+
+static void print_apple_serror_regs(void)
+{
+	printk("L2C_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_L2C_ERR_STS));
+	printk("L2C_ERR_ADR: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_L2C_ERR_ADR));
+	printk("L2C_ERR_INF: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_L2C_ERR_INF));
+
+	if (!(read_sysreg_s(SYS_MPIDR_EL1) & (1 << 16))) {
+		printk("E_LSU_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_E_LSU_ERR_STS));
+		printk("E_FED_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_E_FED_ERR_STS));
+		printk("E_MMU_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_E_MMU_ERR_STS));
+	} else {
+		printk("LSU_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_LSU_ERR_STS));
+		printk("FED_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_FED_ERR_STS));
+		printk("MMU_ERR_STS: 0x%llx\n", read_sysreg_s(SYS_IMP_APL_MMU_ERR_STS));
+	}
+}
+
 void __noreturn arm64_serror_panic(struct pt_regs *regs, u32 esr)
 {
 	console_verbose();
@@ -900,6 +927,8 @@ void __noreturn arm64_serror_panic(struct pt_regs *regs, u32 esr)
 		smp_processor_id(), esr, esr_get_class_string(esr));
 	if (regs)
 		__show_regs(regs);
+	if (read_cpuid_implementor() == ARM_CPU_IMP_APPLE)
+		print_apple_serror_regs();
 
 	nmi_panic(regs, "Asynchronous SError Interrupt");
 
