@@ -1980,6 +1980,8 @@ static int iommu_check_page_size(struct iommu_domain *domain)
 {
 	if (!(domain->type & __IOMMU_DOMAIN_PAGING))
 		return 0;
+	if (domain->type & __IOMMU_DOMAIN_LP)
+		return 0;
 
 	if (domain->pgsize_bitmap & (PAGE_SIZE | (PAGE_SIZE - 1))) {
 		pr_warn("IOMMU pages cannot exactly represent CPU pages.\n");
