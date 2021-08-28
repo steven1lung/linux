@@ -1976,11 +1976,15 @@ void iommu_domain_free(struct iommu_domain *domain)
 }
 EXPORT_SYMBOL_GPL(iommu_domain_free);
 
-static int iommu_check_page_size(struct iommu_domain *domain)
+static int iommu_check_page_size(struct iommu_domain *domain,
+				struct device *dev)
 {
+	bool trusted = !(dev_is_pci(dev) && to_pci_dev(dev)->untrusted);
+
 	if (!(domain->type & __IOMMU_DOMAIN_PAGING))
 		return 0;
-
+	if ((domain->type & __IOMMU_DOMAIN_LP) && trusted)
+		return 0;
 	if (domain->pgsize_bitmap & (PAGE_SIZE | (PAGE_SIZE - 1))) {
 		pr_warn("IOMMU pages cannot exactly represent CPU pages.\n");
 		return -EFAULT;
@@ -2006,7 +2010,7 @@ static int __iommu_attach_device(struct iommu_domain *domain,
 	 * only limit domain->pgsize_bitmap after having attached the first
 	 * device.
 	 */
-	ret = iommu_check_page_size(domain);
+	ret = iommu_check_page_size(domain, dev);
 	if (ret) {
 		__iommu_detach_device(domain, dev);
 		return ret;
