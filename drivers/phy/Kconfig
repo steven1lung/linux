@@ -70,6 +70,14 @@ config PHY_CAN_TRANSCEIVER
 	  functional modes using gpios and sets the attribute max link
 	  rate, for CAN drivers.
 
+config PHY_APPLE
+	tristate "Apple SoC PHY support"
+	depends on ARCH_APPLE && (ARM64 || COMPILE_TEST)
+	default ARCH_APPLE
+	select USB_PHY
+	help
+	  TODO
+
 source "drivers/phy/allwinner/Kconfig"
 source "drivers/phy/amlogic/Kconfig"
 source "drivers/phy/broadcom/Kconfig"

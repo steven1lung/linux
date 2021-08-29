@@ -233,5 +233,21 @@
 			interrupt-controller;
 			#interrupt-cells = <1>;
 		};
+
+		atc_phy0: phy@382a90000 {
+			compatible = "apple,t8103-phy";
+			reg = <0x3 0x82a90000 0x0 0x4000>;
+			reg-names = "usb-phy";
+			interrupt-parent = <&smc>;
+			interrupts = <21>;
+		};
+
+		atc_phy1: phy@502a90000 {
+			compatible = "apple,t8103-phy";
+			reg = <0x5 0x02a90000 0x0 0x4000>;
+			reg-names = "usb-phy";
+			interrupt-parent = <&smc>;
+			interrupts = <21>;
+		};
 	};
 };
