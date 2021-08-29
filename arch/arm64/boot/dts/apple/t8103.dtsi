@@ -230,6 +230,8 @@
 			reg = <0x2 0x3e400000 0x0 0x4000>, <0x2 0x3fe00000 0x0 0x100000>;
 			mboxes = <&smc_mbox>;
 			mbox-names = "smc-asc";
+			interrupt-controller;
+			#interrupt-cells = <1>;
 		};
 	};
 };
